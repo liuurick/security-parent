@@ -88,7 +88,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .failureHandler(customAuthenticationFailureHandler) // 认证失败处理器
                 .and()
                 .authorizeRequests() // 认证请求
-                .antMatchers("/login/page").permitAll()
+                .antMatchers(securityProperties.getAuthentication().getLoginPage(), "/code/image").permitAll()
                 .anyRequest().authenticated() // 所有进入应用的HTTP请求都要进行认证
         ;
     }

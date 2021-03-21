@@ -1,8 +1,5 @@
 package com.liuurick.web.security;
 
-/**
- * @author liubin
- */
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         log.info("请求认证的用户名: " + username);
 
         // 1. 通过请求的用户名去数据库中查询用户信息
-        if(!"liu".equalsIgnoreCase(username)) {
+        if(!"liubin".equalsIgnoreCase(username)) {
             throw new UsernameNotFoundException("用户名或密码错误");
         }
         // 假设当前这个用户在数据库当中存储的密码是123456
