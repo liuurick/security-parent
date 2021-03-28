@@ -1,8 +1,9 @@
-package com.liuurick.web.controller;
+package com.liuurick.security.controller;
 
 import com.google.code.kaptcha.impl.DefaultKaptcha;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,14 +18,18 @@ import java.io.IOException;
 /**
  * @author liubin
  */
-@Controller
 @Slf4j
+@Controller
 public class CustomLoginController {
-
     public static final String SESSION_KEY = "SESSION_KEY_IMAGE_CODE";
 
+    /**
+     * 前往认证(登录)页面
+     * @return
+     */
     @RequestMapping("/login/page")
-    public String loginPage(HttpServletRequest request, HttpServletResponse response){
+    public String toLogin() {
+        // classpath: /templates/login.html
         return "login";
     }
 
@@ -35,8 +40,7 @@ public class CustomLoginController {
      * 获取图形验证码
      */
     @RequestMapping("/code/image")
-    public void imageCode(HttpServletRequest request, HttpServletResponse response) throws
-            IOException {
+    public void imageCode(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // 1. 获取验证码字符串
         String code = defaultKaptcha.createText();
         log.info("生成的图形验证码是：" + code);

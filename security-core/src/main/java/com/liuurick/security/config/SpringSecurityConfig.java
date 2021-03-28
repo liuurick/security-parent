@@ -1,5 +1,8 @@
 package com.liuurick.security.config;
 
+import com.liuurick.security.authentication.code.ImageCodeValidateFilter;
+import com.liuurick.security.authentication.mobile.MobileAuthenticationConfig;
+import com.liuurick.security.authentication.mobile.MobileValidateFilter;
 import com.liuurick.security.properties.SecurityProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +18,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+
+import javax.sql.DataSource;
 
 /**
  * @author liubin
@@ -31,6 +38,12 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     private UserDetailsService customUserDetailsService;
 
     /**
+     * 验证码校验过滤器
+      */
+    @Autowired
+    private ImageCodeValidateFilter imageCodeValidateFilter;
+
+    /**
      * 注入自定义的认证成功处理器
       */
     @Autowired
@@ -38,7 +51,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private AuthenticationFailureHandler customAuthenticationFailureHandler;
-
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -67,6 +79,24 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     /**
+     * 记住我功能
+     */
+    @Autowired
+    DataSource dataSource;
+
+    @Bean
+    public JdbcTokenRepositoryImpl jdbcTokenRepository() {
+        JdbcTokenRepositoryImpl jdbcTokenRepository = new JdbcTokenRepositoryImpl();
+        jdbcTokenRepository.setDataSource(dataSource);
+        return jdbcTokenRepository;
+    }
+
+    @Autowired
+    private MobileValidateFilter mobileValidateFilter;
+
+    @Autowired
+    private MobileAuthenticationConfig mobileAuthenticationConfig;
+    /**
      * 资源权限配置（过滤器链）:
      * 1、被拦截的资源
      * 2、资源所对应的角色权限
@@ -78,27 +108,45 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
      */
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        //http.httpBasic()
-        http.formLogin()
+            //http.httpBasic()
+            http.addFilterBefore(mobileValidateFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(imageCodeValidateFilter, UsernamePasswordAuthenticationFilter.class)
+                .formLogin() // 表单登录方式
                 .loginPage("/login/page").permitAll()
                 .loginProcessingUrl("/login/form")
                 .usernameParameter("name")
                 .passwordParameter("pwd")
-                .successHandler(customAuthenticationSuccessHandler) // 认证成功处理器
-                .failureHandler(customAuthenticationFailureHandler) // 认证失败处理器
+                // 认证成功处理器
+                .successHandler(customAuthenticationSuccessHandler)
+                // 认证失败处理器
+                .failureHandler(customAuthenticationFailureHandler)
                 .and()
                 .authorizeRequests() // 认证请求
-                .antMatchers(securityProperties.getAuthentication().getLoginPage(), "/code/image").permitAll()
+                .antMatchers(securityProperties.getAuthentication().getLoginPage(), "/code/image","/mobile/page", "/code/mobile").permitAll()
                 .anyRequest().authenticated() // 所有进入应用的HTTP请求都要进行认证
+                .and()
+                .rememberMe() //记住我
+                //保持登陆信息
+                .tokenRepository(jdbcTokenRepository())
+                //保持登陆时间
+                .tokenValiditySeconds(60*60*24*7)
         ;
+        //将手机认证添加到过滤器链上
+        http.apply(mobileAuthenticationConfig);
     }
 
+    /**
+     * 针对静态资源放行
+     */
     @Override
     public void configure(WebSecurity web) {
         web.ignoring().antMatchers(securityProperties.getAuthentication().getStaticPaths());
     }
 
 
+    /**
+     * 针对静态资源放行
+     */
 //    @Override
 //    public void configure(WebSecurity web) {
 //        web.ignoring().antMatchers("/dist/**", "/modules/**", "/plugins/**");

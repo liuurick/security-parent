@@ -2,7 +2,7 @@ package com.liuurick.security.authentication.code;
 
 import com.liuurick.security.authentication.CustomAuthenticationFailureHandler;
 import com.liuurick.security.properties.SecurityProperties;
-import com.liuurick.web.controller.CustomLoginController;
+import com.liuurick.security.controller.CustomLoginController;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.AuthenticationException;
@@ -24,6 +24,12 @@ public class ImageCodeValidateFilter extends OncePerRequestFilter {
 
     @Autowired
     SecurityProperties securityProperties;
+
+    /**
+     * 验证码校验过滤器
+      */
+    @Autowired
+    ImageCodeValidateFilter imageCodeValidateFilter;
 
     @Autowired
     CustomAuthenticationFailureHandler customAuthenticationFailureHandler;

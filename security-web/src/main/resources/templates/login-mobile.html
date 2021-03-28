@@ -52,6 +52,7 @@
 
         <!-- 提示信息, 表达式红线没关系，忽略它 -->
         <div th:if="${param.error}">
+          <!--/*@thymesVar id="SPRING_SECURITY_LAST_EXCEPTION" type=""*/-->
           <span th:text="${session.SPRING_SECURITY_LAST_EXCEPTION?.message}" style="color:red"></span>
         </div>
 
@@ -109,11 +110,22 @@
 <script>
     // 发送验证码
     $("#sendCode").click(function () {
-        var mobile = $('#mobile').val().trim();
+      //正则表达式，十一位数字的电话号码
+      var phoneReg = /^(13[0-9]|14[5|7]|15[0|1|2|3|4|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d{8}$/;
+
+
+      var mobile = $('#mobile').val().trim();
         if(mobile == '') {
             alert("手机号不能为空");
             return;
         }
+
+      //验证输入的电话号码是否是11位数字
+      if(!phoneReg.test(mobile)){
+        alert("手机号格式不正确");
+        return false;
+      }
+
         var url = $(this).attr("code_url") + mobile;
         $.get(url, function(data){
             alert(data.code === 200 ? "发送成功": "发送失败");

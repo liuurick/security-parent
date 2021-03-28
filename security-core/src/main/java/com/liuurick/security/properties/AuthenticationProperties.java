@@ -27,4 +27,22 @@ public class AuthenticationProperties {
     public void setLoginType(LoginResponseType loginType) {
         this.loginType = loginType;
     }
+
+    /**
+     * 获取图形验证码 url
+     */
+    private String imageCodeUrl = "/code/image";
+    /**
+     * 发送手机验证码 url
+     */
+    private String mobileCodeUrl = "/code/mobile";
+    /**
+     * 前往手机登录页面地址
+     */
+    private String mobilePage = "/mobile/page";
+    /**
+     * 记住我有效时长
+     */
+    private Integer tokenValiditySeconds = 60*60*24*7;
+
 }

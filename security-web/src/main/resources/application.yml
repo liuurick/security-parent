@@ -1,9 +1,19 @@
 server:
   port: 8080
 
+
 spring:
   thymeleaf:
     cache: false #关闭thymeleaf缓存
+  # 数据源配置
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://127.0.0.1:3306/study-security?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf8
+    #mysql8版本以上驱动包指定新的驱动类
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+
 
 liubin:
   security:
@@ -17,3 +27,8 @@ liubin:
         - /modules/**
         - /plugins/**
       loginType: REDIRECT # 认证之后 响应的类型：JSON/REDIRECT
+
+imageCodeUrl: /code/image # 获取图形验证码 url
+mobileCodeUrl: /code/mobile # 发送手机验证码 url
+mobilePage: /mobile/page # 前往手机登录页面地址
+tokenValiditySeconds: 604800 # 记住我有效时长，单位秒， 注意不要用乘法*，会被认为字符串
