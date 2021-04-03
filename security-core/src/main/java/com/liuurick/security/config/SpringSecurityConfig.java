@@ -20,6 +20,8 @@ import org.springframework.security.web.authentication.AuthenticationFailureHand
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.rememberme.JdbcTokenRepositoryImpl;
+import org.springframework.security.web.session.InvalidSessionStrategy;
+import org.springframework.security.web.session.SessionInformationExpiredStrategy;
 
 import javax.sql.DataSource;
 
@@ -30,6 +32,15 @@ import javax.sql.DataSource;
 @EnableWebSecurity
 @Slf4j
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    /**
+     * 注入session失败策略
+     */
+    @Autowired
+    private InvalidSessionStrategy invalidSessionStrategy;
+
+    @Autowired
+    private SessionInformationExpiredStrategy sessionInformationExpiredStrategy;
 
     @Autowired
     private SecurityProperties securityProperties;
@@ -130,6 +141,20 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .tokenRepository(jdbcTokenRepository())
                 //保持登陆时间
                 .tokenValiditySeconds(60*60*24*7)
+                .and()
+                .sessionManagement()
+                // session失效后处理逻辑
+                .invalidSessionStrategy(invalidSessionStrategy)
+                .and()
+                .sessionManagement()
+                // session失效后处理逻辑
+                .invalidSessionStrategy(invalidSessionStrategy)
+                // 每个用户在系统中的最大session数
+                .maximumSessions(1)
+                // 当用户达到最大session数后，则调用此处的实现
+                .expiredSessionStrategy(sessionInformationExpiredStrategy)
+                // 当一个用户达到最大session数，则不允许后面进行登录
+                .maxSessionsPreventsLogin(true)
         ;
         //将手机认证添加到过滤器链上
         http.apply(mobileAuthenticationConfig);

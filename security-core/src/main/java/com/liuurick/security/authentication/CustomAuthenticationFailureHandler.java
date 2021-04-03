@@ -54,9 +54,21 @@ public class CustomAuthenticationFailureHandler extends SimpleUrlAuthenticationF
             // 重写向回认证页面，注意加上 ?error
             // super.setDefaultFailureUrl(securityProperties.getAuthentication().getLoginPage()+"?error");
             // 获取上一次请求路径
+//            String referer = request.getHeader("Referer");
+//            logger.info("referer:" + referer);
+//            String lastUrl = StringUtils.substringBefore(referer,"?");
+//            logger.info("上一次请求的路径 ：" + lastUrl);
+//            super.setDefaultFailureUrl(lastUrl+"?error");
+//            super.onAuthenticationFailure(request, response, exception);
+
             String referer = request.getHeader("Referer");
             logger.info("referer:" + referer);
-            String lastUrl = StringUtils.substringBefore(referer,"?");
+
+            // 如果下面有值,则认为是多端登录,直接返回一个登录地址
+            Object toAuthentication = request.getAttribute("toAuthentication");
+            String lastUrl = toAuthentication != null ? securityProperties.getAuthentication().getLoginPage()
+                    : StringUtils.substringBefore(referer,"?");
+
             logger.info("上一次请求的路径 ：" + lastUrl);
             super.setDefaultFailureUrl(lastUrl+"?error");
             super.onAuthenticationFailure(request, response, exception);
